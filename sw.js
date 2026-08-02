@@ -1,4 +1,4 @@
-const CACHE_NAME = 'clockit-cache-v3'; // Increment version number (v2, v3, etc.) on new updates
+const CACHE_NAME = 'clockit-cache-v4'; // Increment version number (v2, v3, etc.) on new updates
 const urlsToCache = [
   './',
   './index.html',
