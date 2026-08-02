@@ -1,12 +1,12 @@
-# ⏰ Clock it — Attendance & Task Tracker PWA
+#  Clock it — Attendance & Task Tracker PWA
 
 **Clock it** is a mobile-first Progressive Web App (PWA) designed for engineering students to track class attendance, calculate target/safe bunks, manage batch-filtered timetables, and stay on top of assignment deadlines.
 
-🚀 **Live Application:** [https://clock-it-flame.vercel.app](https://clock-it-flame.vercel.app)  
+ **Live Application:** [https://clock-it-flame.vercel.app](https://clock-it-flame.vercel.app)  
 
 ---
 
-## ✨ Features
+## Features
 
 - **📊 Attendance & Bunk Target Calculators:** 
   - Real-time calculation of safe bunks or required classes needed to maintain 75% or 50% attendance thresholds.
@@ -25,7 +25,7 @@
 
 ---
 
-## 🛠️ Tech Stack
+##  Tech Stack
 
 - **Frontend:** HTML5, Modern JavaScript (ES6+), Tailwind CSS
 - **PWA Capabilities:** Web App Manifest, Service Worker API, Push Notifications API
@@ -34,7 +34,7 @@
 
 ---
 
-## 🏗️ PWA & Cache Architecture
+##  PWA & Cache Architecture
 
 To ensure instant code updates across all installed devices without old code staying stuck in cache, **Clock it** implements a **Network-First Service Worker Strategy**:
 
@@ -56,7 +56,7 @@ To ensure instant code updates across all installed devices without old code sta
 }
 Auto-Reload Pipeline: When a new sw.js version is detected, the app automatically purges old cache instances and reloads the interface seamlessly.
 
-🚀 Local Setup & Development
+  Local Setup & Development
 Clone the repository:
 
 Bash
@@ -70,5 +70,5 @@ Deploy to Vercel:
 
 Push code changes to the main branch to trigger auto-deployments on Vercel.
 
-📄 License
+ -License
 This project is open source and available under the MIT License.
