@@ -7,7 +7,8 @@
   
   <!-- PWA Headers for iOS & Android Installation -->
   <link rel="manifest" href="manifest.json">
-  <link rel="apple-touch-icon" href="https://fav.farm/⏰">
+  <link rel="apple-touch-icon" href="icon.png">
+  <link rel="icon" type="image/png" href="icon.png">
   <meta name="theme-color" content="#020617">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Clock it">
@@ -359,9 +360,9 @@
         FRI: ["Devops (8:30)", "OS (9:30)", "Devops (10:30)", "DBMS (11:30)"]
       },
       D10C: {
-        MON: ["DBMS (8:30)", "OS (9:30)", "DBMS Lab/509/C (10:30)", "OS Lab/513/A/B (10:30)", "Devops Lab/512/B (11:30)", "Devops (1:30-3:30)"],
+        MON: ["DBMS (10:30-12:30)", "OS (10:30-12:30)", "DBMS Lab/509/C (10:30-12:30)", "OS Lab/513/A/B (10:30-12:30)", "Devops Lab/512/B (10:30-12:30)", "Devops (1:30-3:30)"],
         TUE: ["PCE Tut/516 (8:30-10:30)", "Devops (10:30)", "DBMS (11:30)", "DSA Lab/512/C (1:30-3:30)"],
-        WED: ["DBMS (8:30)", "OS (9:30)", "DSA (10:30)", "FM (11:30)", "OS Lab/513/C/ (1:30-3:30)", "DBMS Lab/511/A (1:30-3:30)", "DSA Lab/510/B (1:30-3:30)"],
+        WED: ["DBMS (8:30)", "OS (9:30)", "DSA (10:30)", "FM (11:30)", "OS Lab/513/C (1:30-3:30)", "DBMS Lab/511/A (1:30-3:30)", "DSA Lab/510/B (1:30-3:30)"],
         THU: ["PCE Tut/516 (8:30-10:30)", "OS (10:30)", "DSA (11:30)", "Devops Lab/510/C (1:30-3:30)", "OS Lab/512/B (1:30-3:30)", "DSA Lab/511/A (1:30-3:30)"],
         FRI: ["DSA (8:30)", "Devops (9:30)", "FM (10:30)", "PCE Tut/516 (11:30)", "Devops Lab/512/A (1:30-3:30)", "DBMS Lab/513/B (1:30-3:30)"]
       }
@@ -560,7 +561,11 @@
       const isIncrease = parseFloat(delta) >= 0;
 
       title.innerText = subject;
-      sub.innerText = `Marked ${status === 'present' ? 'Present' : 'Absent'} (${newPct.toFixed(1)}%)`;
+      if (status === 'undo') {
+        sub.innerText = `Undid last mark (${newPct.toFixed(1)}%)`;
+      } else {
+        sub.innerText = `Marked ${status === 'present' ? 'Present' : 'Absent'} (${newPct.toFixed(1)}%)`;
+      }
 
       if (isIncrease) {
         icon.innerText = "📈";
@@ -585,14 +590,20 @@
     function mark(rawSubject, status) {
       const cleanSub = getCleanSubjectName(rawSubject);
 
-      if (!attendance[cleanSub]) attendance[cleanSub] = { present: 0, total: 0 };
-      
+      if (!attendance[cleanSub]) attendance[cleanSub] = { present: 0, total: 0, lastAction: [] };
+      if (!attendance[cleanSub].lastAction) attendance[cleanSub].lastAction = [];
+
       const oldP = attendance[cleanSub].present;
       const oldT = attendance[cleanSub].total;
       const oldPct = oldT > 0 ? (oldP / oldT) * 100 : 0;
 
       attendance[cleanSub].total += 1;
-      if (status === 'present') attendance[cleanSub].present += 1;
+      if (status === 'present') {
+        attendance[cleanSub].present += 1;
+        attendance[cleanSub].lastAction.push('present');
+      } else {
+        attendance[cleanSub].lastAction.push('absent');
+      }
 
       const newP = attendance[cleanSub].present;
       const newT = attendance[cleanSub].total;
@@ -603,22 +614,53 @@
       showToast(cleanSub, status, oldPct, newPct);
     }
 
+    function undoLastClass(rawSubject) {
+      const cleanSub = getCleanSubjectName(rawSubject);
+      if (!attendance[cleanSub] || attendance[cleanSub].total <= 0) return;
+
+      const oldP = attendance[cleanSub].present;
+      const oldT = attendance[cleanSub].total;
+      const oldPct = oldT > 0 ? (oldP / oldT) * 100 : 0;
+
+      if (!attendance[cleanSub].lastAction) attendance[cleanSub].lastAction = [];
+      const lastType = attendance[cleanSub].lastAction.pop() || 'present';
+
+      // Revert the total count
+      attendance[cleanSub].total = Math.max(0, attendance[cleanSub].total - 1);
+
+      // If the undone mark was Present, reduce present count as well
+      if (lastType === 'present') {
+        attendance[cleanSub].present = Math.max(0, attendance[cleanSub].present - 1);
+      }
+
+      const newP = attendance[cleanSub].present;
+      const newT = attendance[cleanSub].total;
+      const newPct = newT > 0 ? (newP / newT) * 100 : 0;
+
+      localStorage.setItem('d10c_attendance', JSON.stringify(attendance));
+      renderStats();
+      showToast(cleanSub, 'undo', oldPct, newPct);
+    }
+
     function logExtra(status) {
       const selectedSub = document.getElementById('extraSubjectSelect').value;
       mark(selectedSub, status);
     }
 
     function adjustCount(cleanSub, field, delta) {
-      if (!attendance[cleanSub]) attendance[cleanSub] = { present: 0, total: 0 };
+      if (!attendance[cleanSub]) attendance[cleanSub] = { present: 0, total: 0, lastAction: [] };
       
       const oldP = attendance[cleanSub].present;
       const oldT = attendance[cleanSub].total;
       const oldPct = oldT > 0 ? (oldP / oldT) * 100 : 0;
 
       if (field === 'present') {
-        attendance[cleanSub].present = Math.max(0, attendance[cleanSub].present + delta);
-        if (attendance[cleanSub].present > attendance[cleanSub].total) {
-          attendance[cleanSub].total = attendance[cleanSub].present;
+        if (delta < 0) {
+          undoLastClass(cleanSub);
+          return;
+        } else {
+          mark(cleanSub, 'present');
+          return;
         }
       }
 
@@ -628,7 +670,7 @@
 
       localStorage.setItem('d10c_attendance', JSON.stringify(attendance));
       renderStats();
-      showToast(cleanSub, delta > 0 ? 'present' : 'absent', oldPct, newPct);
+      showToast(cleanSub, 'undo', oldPct, newPct);
     }
 
     function selectDay(day) {
@@ -670,9 +712,10 @@
       container.innerHTML = filteredList.map(sub => `
         <div class="flex items-center justify-between p-3.5 bg-slate-900/60 rounded-2xl border border-slate-800/80 hover:border-slate-700 transition">
           <span class="font-semibold text-slate-200 text-xs">${sub}</span>
-          <div class="flex gap-2">
+          <div class="flex gap-1.5">
             <button onclick="mark('${sub.replace(/'/g, "\\'")}', 'present')" class="w-8 h-8 bg-emerald-600/20 hover:bg-emerald-600 text-emerald-400 hover:text-white border border-emerald-500/30 rounded-xl text-xs font-bold transition active:scale-90 flex items-center justify-center">P</button>
             <button onclick="mark('${sub.replace(/'/g, "\\'")}', 'absent')" class="w-8 h-8 bg-rose-600/20 hover:bg-rose-600 text-rose-400 hover:text-white border border-rose-500/30 rounded-xl text-xs font-bold transition active:scale-90 flex items-center justify-center">A</button>
+            <button onclick="undoLastClass('${sub.replace(/'/g, "\\'")}')" class="w-8 h-8 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 rounded-xl text-xs font-bold transition active:scale-90 flex items-center justify-center" title="Undo Last Action">↺</button>
           </div>
         </div>
       `).join('');
@@ -768,7 +811,7 @@
         if ("Notification" in window && Notification.permission === "granted") {
           new Notification("🔔 Assignment Reminder", {
             body: `"${urgentTasks[0].title}" is due soon!`,
-            icon: "https://fav.farm/📝"
+            icon: "icon.png"
           });
         }
       } else {
@@ -956,7 +999,7 @@
     init();
   </script>
 
-  <!-- Service Worker Registration Snippet -->
+  <!-- Service Worker Registration -->
   <script>
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('./sw.js');
