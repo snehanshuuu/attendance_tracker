@@ -45,17 +45,15 @@
     .tear-left { left: 4px; bottom: -6px; animation-delay: 0s; }
     .tear-right { right: 4px; bottom: -6px; animation-delay: 0.45s; }
 
-    /* EXACT VIDEO-INSPIRED ANIMATION SEQUENCING */
-    /* 1. Finger pinch gesture */
+    /* Animation Sequencing */
     @keyframes pinch-tap {
       0% { transform: scale(1) translateY(0); }
-      35% { transform: scale(0.88) translateY(2px); } /* Tap down */
+      35% { transform: scale(0.88) translateY(2px); }
       60% { transform: scale(1.05) translateY(-2px); }
       100% { transform: scale(1) translateY(0); }
     }
     .animate-pinch-tap { animation: pinch-tap 0.8s 0.3s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
 
-    /* 2. Clock shrinks & vanishes right on the tap moment */
     @keyframes clock-disappear {
       0% { transform: scale(1); opacity: 1; filter: drop-shadow(0 0 12px rgba(99, 102, 241, 0.8)); }
       50% { transform: scale(1.3); opacity: 0.9; filter: drop-shadow(0 0 25px rgba(168, 85, 247, 1)); }
@@ -63,7 +61,6 @@
     }
     .animate-clock-disappear { animation: clock-disappear 0.5s 0.6s cubic-bezier(0.6, -0.28, 0.735, 0.045) forwards; }
 
-    /* 3. Text reveals right after clock vanishes */
     @keyframes text-pop {
       0% { opacity: 0; transform: translateY(10px) scale(0.9); }
       100% { opacity: 1; transform: translateY(0) scale(1); }
@@ -76,35 +73,21 @@
   <!-- INTRO SPLASH SCREEN -->
   <div id="splashScreen" class="fixed inset-0 bg-slate-950 z-[100] flex flex-col items-center justify-center p-6 transition-opacity duration-700">
     <div class="text-center space-y-6 max-w-xs w-full">
-      
-      <!-- Pinch Hand Card Container -->
       <div class="relative w-36 h-36 mx-auto flex items-center justify-center">
-        <!-- Glow Aura Background -->
         <div class="absolute inset-0 bg-gradient-to-tr from-indigo-600/40 via-violet-500/30 to-emerald-500/20 rounded-full blur-2xl animate-pulse"></div>
-
-        <!-- Tap Card -->
         <div class="relative w-28 h-28 glass-card border border-indigo-500/30 rounded-3xl flex items-center justify-center shadow-2xl animate-pinch-tap">
-          <!-- Pinch Hand Emoji -->
           <span class="text-5xl select-none z-10">🤏</span>
-
-          <!-- Clock emoji that disappears on tap -->
-          <div class="absolute text-3xl z-20 transition-all duration-300 animate-clock-disappear">
-            ⏰
-          </div>
+          <div class="absolute text-3xl z-20 transition-all duration-300 animate-clock-disappear">⏰</div>
         </div>
       </div>
-
-      <!-- App Name & Revealed Text -->
       <div class="space-y-2">
         <h1 class="text-3xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-violet-300 to-white">
           Clock it
         </h1>
-        <!-- Custom text revealed on tap -->
         <p class="text-sm font-extrabold text-indigo-300 opacity-0 animate-text-pop tracking-wide">
           Now you know when to bunk
         </p>
       </div>
-
     </div>
   </div>
 
@@ -289,8 +272,6 @@
 
     <!-- TAB 4: ASSIGNMENTS VIEW -->
     <div id="tabAssignments" class="hidden space-y-5">
-      
-      <!-- Upcoming Deadline Alert Banner -->
       <div id="taskAlertBanner" class="hidden p-4 bg-amber-500/10 border border-amber-500/30 rounded-2xl flex items-center justify-between">
         <div class="flex items-center gap-2.5">
           <span class="text-amber-400 text-lg">⚠️</span>
@@ -360,7 +341,7 @@
         FRI: ["Devops (8:30)", "OS (9:30)", "Devops (10:30)", "DBMS (11:30)"]
       },
       D10C: {
-        MON: ["DBMS (10:30-12:30)", "OS (10:30-12:30)", "DBMS Lab/509/C (10:30-12:30)", "OS Lab/513/A/B (10:30-12:30)", "Devops Lab/512/B (10:30-12:30)", "Devops (1:30-3:30)"],
+        MON: ["DBMS (8:30-9:30)", "OS (9:30-10:30)", "DBMS Lab/509/C (10:30-12:30)", "OS Lab/513/A/B (10:30-12:30)", "Devops Lab/512/B (10:30-12:30)", "Devops (1:30-3:30)"],
         TUE: ["PCE Tut/516 (8:30-10:30)", "Devops (10:30)", "DBMS (11:30)", "DSA Lab/512/C (1:30-3:30)"],
         WED: ["DBMS (8:30)", "OS (9:30)", "DSA (10:30)", "FM (11:30)", "OS Lab/513/C (1:30-3:30)", "DBMS Lab/511/A (1:30-3:30)", "DSA Lab/510/B (1:30-3:30)"],
         THU: ["PCE Tut/516 (8:30-10:30)", "OS (10:30)", "DSA (11:30)", "Devops Lab/510/C (1:30-3:30)", "OS Lab/512/B (1:30-3:30)", "DSA Lab/511/A (1:30-3:30)"],
@@ -625,10 +606,8 @@
       if (!attendance[cleanSub].lastAction) attendance[cleanSub].lastAction = [];
       const lastType = attendance[cleanSub].lastAction.pop() || 'present';
 
-      // Revert the total count
       attendance[cleanSub].total = Math.max(0, attendance[cleanSub].total - 1);
 
-      // If the undone mark was Present, reduce present count as well
       if (lastType === 'present') {
         attendance[cleanSub].present = Math.max(0, attendance[cleanSub].present - 1);
       }
@@ -999,22 +978,20 @@
     init();
   </script>
 
-  <!-- Service Worker Registration -->
   <!-- Service Worker Registration with Auto-Reload -->
-<script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js').then((reg) => {
-      reg.addEventListener('updatefound', () => {
-        const newWorker = reg.installing;
-        newWorker.addEventListener('statechange', () => {
-          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-            // New version installed! Reload the page automatically for the user.
-            window.location.reload();
-          }
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js').then((reg) => {
+        reg.addEventListener('updatefound', () => {
+          const newWorker = reg.installing;
+          newWorker.addEventListener('statechange', () => {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              window.location.reload();
+            }
+          });
         });
       });
-    });
-  }
-</script>
+    }
+  </script>
 </body>
 </html>
