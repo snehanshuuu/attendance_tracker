@@ -1,41 +1,41 @@
-const CACHE_NAME = 'clockit-cache-v4'; // Increment version number (v2, v3, etc.) on new updates
-const urlsToCache = [
-  './',
-  './index.html',
-  './manifest.json',
-  './icon.png'
-];
+const CACHE_NAME = 'clockit-cache-v5';
 
-// Install Event
+// Install - force immediate activation
 self.addEventListener('install', (event) => {
-  self.skipWaiting(); // Force waiting service worker to become active immediately
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(urlsToCache);
-    })
-  );
+  self.skipWaiting();
 });
 
-// Activate Event (Deletes old caches automatically)
+// Activate - delete all old caches
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
-        cacheNames.map((cache) => {
-          if (cache !== CACHE_NAME) {
-            return caches.delete(cache); // Delete old cached versions like v1
-          }
-        })
+        cacheNames.map((cache) => caches.delete(cache))
       );
-    }).then(() => self.clients.claim()) // Take control of all open app tabs immediately
+    }).then(() => self.clients.claim())
   );
 });
 
-// Fetch Event
+// Fetch - Network First (Always try live server first, fallback to cache if offline)
 self.addEventListener('fetch', (event) => {
+  // Only handle GET requests
+  if (event.request.method !== 'GET') return;
+
   event.respondWith(
-    fetch(event.request).catch(() => {
-      return caches.match(event.request);
-    })
+    fetch(event.request)
+      .then((networkResponse) => {
+        // If network request succeeds, clone and update local cache
+        if (networkResponse && networkResponse.status === 200) {
+          const responseToCache = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseToCache);
+          });
+        }
+        return networkResponse;
+      })
+      .catch(() => {
+        // If offline/network fails, load from local cache
+        return caches.match(event.request);
+      })
   );
 });
