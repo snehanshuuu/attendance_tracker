@@ -20,17 +20,6 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-  <!-- OneSignal Web Push SDK -->
-  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-  <script>
-    window.OneSignalDeferred = window.OneSignalDeferred || [];
-    OneSignalDeferred.push(async function(OneSignal) {
-      await OneSignal.init({
-        appId: "c1cba522-ad0f-4988-a6f4-dcc6c468d488",
-      });
-    });
-  </script>
-
   <style>
     body { font-family: 'Plus Jakarta Sans', sans-serif; }
     .glass-card {
@@ -300,12 +289,7 @@
       <div class="glass-card p-5 rounded-3xl space-y-4">
         <div class="flex items-center justify-between">
           <h2 class="text-sm font-bold text-indigo-400 uppercase tracking-wider">📝 Assignments & Tasks</h2>
-          <div class="flex items-center gap-2">
-            <button onclick="requestPushPermission()" class="text-[10px] font-bold bg-indigo-600/20 border border-indigo-500/30 text-indigo-300 hover:bg-indigo-600 hover:text-white px-2.5 py-1 rounded-xl transition cursor-pointer" title="Enable Reminders">
-              🔔 Enable Push Reminders
-            </button>
-            <span id="taskCountBadge" class="text-[10px] font-extrabold bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 px-2.5 py-1 rounded-xl">0 Pending</span>
-          </div>
+          <span id="taskCountBadge" class="text-[10px] font-extrabold bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 px-2.5 py-1 rounded-xl">0 Pending</span>
         </div>
 
         <form onsubmit="addTask(event)" class="space-y-2.5">
@@ -340,13 +324,6 @@
   </div>
 
   <script>
-    // Trigger notification prompt manually via OneSignal
-    function requestPushPermission() {
-      window.OneSignalDeferred.push(async function(OneSignal) {
-        await OneSignal.Notifications.requestPermission();
-      });
-    }
-
     const timetables = {
       D10A: {
         MON: ["DBMS (8:30)", "Devops (9:30)", "OS (10:30)", "DSA (11:30)", "PCE Tut/514 (1:30-3:30)"],
@@ -387,7 +364,6 @@
       return "Elective";
     }
 
-    /* UPDATED BATCH FILTERING LOGIC */
     function isEntryForUserBatch(entry, userBatch) {
       if (!userBatch) return true;
 
@@ -749,7 +725,7 @@
       `).join('');
     }
 
-    /* ASSIGNMENT LOGIC & REMINDERS */
+    /* ASSIGNMENT LOGIC */
     function addToGoogleCalendar(title, dueDateStr) {
       const cleanDate = dueDateStr.replace(/-/g, '');
       const googleCalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${cleanDate}/${cleanDate}&details=${encodeURIComponent('College Assignment Deadline')}`;
@@ -978,22 +954,6 @@
     }
 
     init();
-  </script>
-
-  <!-- Service Worker Registration with Auto-Reload -->
-  <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./sw.js').then((reg) => {
-        reg.addEventListener('updatefound', () => {
-          const newWorker = reg.installing;
-          newWorker.addEventListener('statechange', () => {
-            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-              window.location.reload();
-            }
-          });
-        });
-      });
-    }
   </script>
 </body>
 </html>
