@@ -344,7 +344,7 @@
         FRI: ["Devops (8:30)", "OS (9:30)", "Devops (10:30)", "DBMS (11:30)"]
       },
       D10C: {
-        MON: ["DBMS (8:30-9:30)", "OS (9:30-10:30)", "DBMS Lab/509/C (10:30-12:30)", "OS Lab/513/A (10:30-12:30)", "Devops Lab/512/B (10:30-12:30)", "Devops (1:30-2:30)"],
+        MON: ["DBMS (8:30-9:30)", "OS (9:30-10:30)", "DBMS Lab/509/C (10:30-12:30)", "OS Lab/513/A/B (10:30-12:30)", "Devops Lab/512/B (10:30-12:30)", "Devops (1:30-2:30)"],
         TUE: ["PCE Tut/516 (8:30-10:30)", "Devops (10:30)", "DBMS (11:30)", "DSA Lab/512/C (1:30-3:30)"],
         WED: ["DBMS (8:30)", "OS (9:30)", "DSA (10:30)", "FM (11:30)", "OS Lab/513/C (1:30-3:30)", "DBMS Lab/511/A (1:30-3:30)", "DSA Lab/510/B (1:30-3:30)"],
         THU: ["PCE Tut/516 (8:30-10:30)", "OS (10:30)", "DSA (11:30)", "Devops Lab/510/C (1:30-3:30)", "OS Lab/512/B (1:30-3:30)", "DSA Lab/511/A (1:30-3:30)"],
@@ -368,19 +368,26 @@
       return "Elective";
     }
 
+    /* UPDATED BATCH FILTERING LOGIC */
     function isEntryForUserBatch(entry, userBatch) {
-      if (!userBatch) return true;
-      const upper = entry.toUpperCase();
+  if (!userBatch) return true;
 
-      const batchRegex = new RegExp(`[/\\s]${userBatch}(?=[/\\s\\(]|$)`, 'i');
-      const containsAnyBatchLetter = /[/\\s][A-C](?=[/\\s\\(]|$)/i.test(upper);
+  // Clean userBatch string (handles 'A', 'Batch A', 'a', etc.)
+  const targetBatch = userBatch.replace(/batch/i, '').trim().toUpperCase();
+  const upperEntry = entry.toUpperCase();
 
-      if (containsAnyBatchLetter) {
-        return batchRegex.test(upper);
-      }
-      
-      return true;
-    }
+  // Find all slash-separated batch letters (e.g., /A, /B, /C, /A/B)
+  const matches = [...upperEntry.matchAll(/\/([A-C])(?=[/\s\(-]|$)/g)];
+
+  // If batch letters are explicitly defined in the timetable string
+  if (matches.length > 0) {
+    const entryBatches = matches.map(m => m[1]);
+    return entryBatches.includes(targetBatch);
+  }
+
+  // If no specific batch slash is present, it's a general lecture for all batches
+  return true;
+}
 
     let userProfile = JSON.parse(localStorage.getItem('d10c_user')) || null;
     let attendance = JSON.parse(localStorage.getItem('d10c_attendance')) || {};
@@ -677,6 +684,7 @@
       renderTimetableViewer();
     }
 
+    /* RENDER SCHEDULE (FILTERED BY BATCH FOR TRACK TAB) */
     function renderSchedule() {
       if (!userProfile) return;
       const userDiv = userProfile.div || 'D10C';
@@ -703,21 +711,19 @@
       `).join('');
     }
 
+    /* RENDER TIMETABLE VIEWER (UNFILTERED FOR SCHEDULE TAB) */
     function renderTimetableViewer() {
       if (!userProfile) return;
       const userDiv = userProfile.div || 'D10C';
-      const userBatch = userProfile.batch || 'A';
       const rawList = timetables[userDiv] ? timetables[userDiv][activeTtDay] : [];
       const container = document.getElementById('timetableViewerContainer');
 
-      const filteredList = rawList.filter(entry => isEntryForUserBatch(entry, userBatch));
-
-      if (!filteredList || filteredList.length === 0) {
-        container.innerHTML = `<p class="text-xs text-slate-500 italic text-center py-6">No classes scheduled for your batch on this day.</p>`;
+      if (!rawList || rawList.length === 0) {
+        container.innerHTML = `<p class="text-xs text-slate-500 italic text-center py-6">No classes scheduled on this day.</p>`;
         return;
       }
 
-      container.innerHTML = filteredList.map(sub => `
+      container.innerHTML = rawList.map(sub => `
         <div class="p-3.5 bg-slate-900/60 rounded-2xl border border-slate-800/80 flex items-center justify-between">
           <div class="flex items-center gap-3">
             <div class="w-2.5 h-2.5 rounded-full bg-indigo-500/80"></div>
