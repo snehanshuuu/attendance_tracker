@@ -19,6 +19,18 @@
 
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- OneSignal Web Push SDK -->
+  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+  <script>
+    window.OneSignalDeferred = window.OneSignalDeferred || [];
+    OneSignalDeferred.push(async function(OneSignal) {
+      await OneSignal.init({
+        appId: "c1cba522-ad0f-4988-a6f4-dcc6c468d488",
+      });
+    });
+  </script>
+
   <style>
     body { font-family: 'Plus Jakarta Sans', sans-serif; }
     .glass-card {
@@ -289,7 +301,7 @@
         <div class="flex items-center justify-between">
           <h2 class="text-sm font-bold text-indigo-400 uppercase tracking-wider">📝 Assignments & Tasks</h2>
           <div class="flex items-center gap-2">
-            <button onclick="requestNotificationPermission()" class="text-[10px] font-bold bg-slate-900 border border-slate-800 text-slate-300 hover:text-white px-2.5 py-1 rounded-xl transition" title="Enable Reminders">
+            <button onclick="requestPushPermission()" class="text-[10px] font-bold bg-indigo-600/20 border border-indigo-500/30 text-indigo-300 hover:bg-indigo-600 hover:text-white px-2.5 py-1 rounded-xl transition cursor-pointer" title="Enable Reminders">
               🔔 Enable Push Reminders
             </button>
             <span id="taskCountBadge" class="text-[10px] font-extrabold bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 px-2.5 py-1 rounded-xl">0 Pending</span>
@@ -328,6 +340,13 @@
   </div>
 
   <script>
+    // Trigger notification prompt manually via OneSignal
+    function requestPushPermission() {
+      window.OneSignalDeferred.push(async function(OneSignal) {
+        await OneSignal.Notifications.requestPermission();
+      });
+    }
+
     const timetables = {
       D10A: {
         MON: ["DBMS (8:30)", "Devops (9:30)", "OS (10:30)", "DSA (11:30)", "PCE Tut/514 (1:30-3:30)"],
@@ -370,24 +389,20 @@
 
     /* UPDATED BATCH FILTERING LOGIC */
     function isEntryForUserBatch(entry, userBatch) {
-  if (!userBatch) return true;
+      if (!userBatch) return true;
 
-  // Clean userBatch string (handles 'A', 'Batch A', 'a', etc.)
-  const targetBatch = userBatch.replace(/batch/i, '').trim().toUpperCase();
-  const upperEntry = entry.toUpperCase();
+      const targetBatch = userBatch.replace(/batch/i, '').trim().toUpperCase();
+      const upperEntry = entry.toUpperCase();
 
-  // Find all slash-separated batch letters (e.g., /A, /B, /C, /A/B)
-  const matches = [...upperEntry.matchAll(/\/([A-C])(?=[/\s\(-]|$)/g)];
+      const matches = [...upperEntry.matchAll(/\/([A-C])(?=[/\s\(-]|$)/g)];
 
-  // If batch letters are explicitly defined in the timetable string
-  if (matches.length > 0) {
-    const entryBatches = matches.map(m => m[1]);
-    return entryBatches.includes(targetBatch);
-  }
+      if (matches.length > 0) {
+        const entryBatches = matches.map(m => m[1]);
+        return entryBatches.includes(targetBatch);
+      }
 
-  // If no specific batch slash is present, it's a general lecture for all batches
-  return true;
-}
+      return true;
+    }
 
     let userProfile = JSON.parse(localStorage.getItem('d10c_user')) || null;
     let attendance = JSON.parse(localStorage.getItem('d10c_attendance')) || {};
@@ -735,21 +750,6 @@
     }
 
     /* ASSIGNMENT LOGIC & REMINDERS */
-    function requestNotificationPermission() {
-      if (!("Notification" in window)) {
-        alert("This browser does not support desktop notifications.");
-        return;
-      }
-      Notification.requestPermission().then(permission => {
-        if (permission === "granted") {
-          alert("Push reminders enabled! You'll be alerted about upcoming assignment deadlines.");
-          checkUpcomingDeadlines();
-        } else {
-          alert("Notification permission was denied.");
-        }
-      });
-    }
-
     function addToGoogleCalendar(title, dueDateStr) {
       const cleanDate = dueDateStr.replace(/-/g, '');
       const googleCalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${cleanDate}/${cleanDate}&details=${encodeURIComponent('College Assignment Deadline')}`;
@@ -795,13 +795,6 @@
       if (urgentTasks.length > 0) {
         alertBanner.classList.remove('hidden');
         alertText.innerText = `"${urgentTasks[0].title}" is due ${urgentTasks[0].dueDate === today ? 'TODAY!' : 'tomorrow!'}`;
-        
-        if ("Notification" in window && Notification.permission === "granted") {
-          new Notification("🔔 Assignment Reminder", {
-            body: `"${urgentTasks[0].title}" is due soon!`,
-            icon: "icon.png"
-          });
-        }
       } else {
         alertBanner.classList.add('hidden');
       }
