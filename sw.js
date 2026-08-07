@@ -1,4 +1,4 @@
-const CACHE_NAME = 'clockit-cache-v7.8';
+const CACHE_NAME = 'clockit-cache-v7.9';
 
 // Install - force immediate activation
 self.addEventListener('install', (event) => {
