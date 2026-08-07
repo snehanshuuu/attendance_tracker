@@ -3,7 +3,7 @@
   ================================================
   APP NAME: Clock it (Attendance & Task Tracker)
   AUTHOR: Snehansu Deo
-  RELEASE: Version 7.8
+  RELEASE: Version 7.9
   ALL RIGHTS RESERVED
   ================================================
 -->
@@ -135,7 +135,7 @@
 
   <!-- INVISIBLE AUTHORSHIP WATERMARK -->
   <div id="author-watermark" aria-hidden="true" style="display: none !important; opacity: 0; pointer-events: none; position: absolute; width: 0; height: 0;">
-    Authored by Snehansu Deo - Clock it v7.8 - All Rights Reserved
+    Authored by Snehansu Deo - Clock it v7.9 - All Rights Reserved
   </div>
 
   <!-- INTRO SPLASH SCREEN -->
@@ -171,7 +171,7 @@
           <div>
             <div class="flex items-center gap-2">
               <h2 class="text-sm font-extrabold text-white tracking-wider uppercase">Clock it</h2>
-              <span class="px-1.5 py-0.5 bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 rounded-md text-[9px] font-extrabold">v7.8</span>
+              <span class="px-1.5 py-0.5 bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 rounded-md text-[9px] font-extrabold">v7.9</span>
             </div>
             <p class="text-[10px] text-slate-400 font-medium">Preferences & Settings</p>
           </div>
@@ -211,7 +211,7 @@
         <span>⚠️</span> Reset All Data
       </button>
       <div class="text-center">
-        <p class="text-[10px] font-semibold text-slate-500 tracking-wider uppercase">Clock it • Version 7.8</p>
+        <p class="text-[10px] font-semibold text-slate-500 tracking-wider uppercase">Clock it • Version 7.9</p>
       </div>
     </div>
   </aside>
@@ -238,10 +238,10 @@
               Midnight Violet
             </button>
             <button onclick="setTheme('funky')" id="btnTheme_funky" class="theme-btn w-full py-2.5 px-3 rounded-xl border font-bold text-xs text-center transition">
-              Funky Cyberpunk ⚡
+              Funky Cyberpunk
             </button>
             <button onclick="setTheme('espresso')" id="btnTheme_espresso" class="theme-btn w-full py-2.5 px-3 rounded-xl border font-bold text-xs text-center transition">
-              Espresso & Cream ☕
+              Espresso & Cream
             </button>
           </div>
         </div>
@@ -537,7 +537,7 @@
   <script>
     // CONSOLE AUTHORSHIP SIGNATURE
     console.log(
-      "%c Developed by Snehansu Deo %c Version 7.8 ",
+      "%c Developed by Snehansu Deo %c Version 7.9 ",
       "background: #4f46e5; color: #ffffff; font-weight: bold; padding: 4px 8px; border-radius: 4px;",
       "background: #1e293b; color: #a5b4fc; padding: 4px 8px; border-radius: 4px;"
     );
@@ -645,7 +645,7 @@
     function init() {
       // WRITE HIDDEN LOCALSTORAGE SIGNATURE FINGERPRINT
       if (!localStorage.getItem('d10c_signature')) {
-        localStorage.setItem('d10c_signature', 'ClockIt_CreatedBy_SnehansuDeo_v7.8');
+        localStorage.setItem('d10c_signature', 'ClockIt_CreatedBy_SnehansuDeo_v7.9');
       }
 
       applyTheme(currentTheme);
