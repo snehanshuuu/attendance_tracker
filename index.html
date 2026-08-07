@@ -3,7 +3,7 @@
   ================================================
   APP NAME: Clock it (Attendance & Task Tracker)
   AUTHOR: Snehansu Deo
-  RELEASE: Version 7.6
+  RELEASE: Version 7.7
   ALL RIGHTS RESERVED
   ================================================
 -->
@@ -26,7 +26,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
   <style>
     body { font-family: 'Plus Jakarta Sans', sans-serif; transition: background-color 0.3s ease, color 0.3s ease; }
@@ -62,6 +62,18 @@
       background: rgba(24, 15, 46, 0.75);
       backdrop-filter: blur(16px);
       border: 1px solid rgba(168, 85, 247, 0.25);
+    }
+
+    /* 4. Funky Cyberpunk Theme */
+    body.theme-funky {
+      background: radial-gradient(circle at top right, #240046, #0d0714, #03001e);
+      color: #f8fafc;
+    }
+    body.theme-funky .glass-card {
+      background: rgba(20, 10, 38, 0.75);
+      backdrop-filter: blur(16px);
+      border: 1.5px solid rgba(236, 72, 153, 0.3);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 0 15px rgba(236, 72, 153, 0.08);
     }
 
     /* Live Emoji Animations */
@@ -112,7 +124,7 @@
 
   <!-- INVISIBLE AUTHORSHIP WATERMARK -->
   <div id="author-watermark" aria-hidden="true" style="display: none !important; opacity: 0; pointer-events: none; position: absolute; width: 0; height: 0;">
-    Authored by Snehansu Deo - Clock it v7.6 - All Rights Reserved
+    Authored by Snehansu Deo - Clock it v7.7 - All Rights Reserved
   </div>
 
   <!-- INTRO SPLASH SCREEN -->
@@ -148,7 +160,7 @@
           <div>
             <div class="flex items-center gap-2">
               <h2 class="text-sm font-extrabold text-white tracking-wider uppercase">Clock it</h2>
-              <span class="px-1.5 py-0.5 bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 rounded-md text-[9px] font-extrabold">v7.6</span>
+              <span class="px-1.5 py-0.5 bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 rounded-md text-[9px] font-extrabold">v7.7</span>
             </div>
             <p class="text-[10px] text-slate-400 font-medium">Preferences & Settings</p>
           </div>
@@ -188,12 +200,12 @@
         <span>⚠️</span> Reset All Data
       </button>
       <div class="text-center">
-        <p class="text-[10px] font-semibold text-slate-500 tracking-wider uppercase">Clock it • Version 7.6</p>
+        <p class="text-[10px] font-semibold text-slate-500 tracking-wider uppercase">Clock it • Version 7.7</p>
       </div>
     </div>
   </aside>
 
-  <!-- APP SETTINGS MODAL (RESTRICTED TO 3 THEMES) -->
+  <!-- APP SETTINGS MODAL -->
   <div id="settingsModal" class="hidden fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center p-4">
     <div class="glass-card p-6 rounded-3xl w-full max-w-sm shadow-2xl space-y-5 border border-indigo-500/30">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
@@ -214,6 +226,9 @@
             <button onclick="setTheme('violet')" id="btnTheme_violet" class="theme-btn w-full py-2.5 px-3 rounded-xl border font-bold text-xs text-center transition">
               Midnight Violet
             </button>
+            <button onclick="setTheme('funky')" id="btnTheme_funky" class="theme-btn w-full py-2.5 px-3 rounded-xl border font-bold text-xs text-center transition">
+              Funky Cyberpunk ⚡
+            </button>
           </div>
         </div>
       </div>
@@ -224,7 +239,7 @@
 
   <div class="max-w-md mx-auto space-y-5">
     
-    <!-- User Setup Modal with Binary Gender Input -->
+    <!-- User Setup Modal -->
     <div id="setupModal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
       <div class="glass-card p-6 rounded-3xl w-full max-w-sm text-center shadow-2xl space-y-5 border border-slate-800">
         <div class="w-12 h-12 bg-indigo-500/20 text-indigo-400 rounded-2xl flex items-center justify-center mx-auto text-xl font-bold">⏰</div>
@@ -488,19 +503,19 @@
 
   </div>
 
-  <!-- FLOATING BOTTOM NAVIGATION BAR -->
+  <!-- FLOATING BOTTOM NAVIGATION BAR (VECTOR SVG ICONS ONLY) -->
   <div class="fixed bottom-4 left-1/2 -translate-x-1/2 max-w-md w-[calc(100%-2rem)] glass-card p-2 rounded-3xl shadow-2xl border border-slate-800 z-40 flex justify-around">
     <button onclick="switchTab('attendance')" id="navAttendance" class="flex-1 py-2.5 rounded-2xl bg-indigo-600 text-white flex items-center justify-center gap-1.5 font-bold text-[11px] transition">
-      <span>📊</span> Track
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg> Track
     </button>
     <button onclick="switchTab('analytics')" id="navAnalytics" class="flex-1 py-2.5 rounded-2xl text-slate-400 hover:text-white flex items-center justify-center gap-1.5 font-bold text-[11px] transition">
-      <span>📈</span> Analytics
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg> Analytics
     </button>
     <button onclick="switchTab('timetable')" id="navTimetable" class="flex-1 py-2.5 rounded-2xl text-slate-400 hover:text-white flex items-center justify-center gap-1.5 font-bold text-[11px] transition">
-      <span>📅</span> Schedule
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2h-2a2 2 0 01-2-2z"/></svg> Schedule
     </button>
     <button onclick="switchTab('assignments')" id="navAssignments" class="flex-1 py-2.5 rounded-2xl text-slate-400 hover:text-white flex items-center justify-center gap-1.5 font-bold text-[11px] transition relative">
-      <span>📝</span> Tasks
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg> Tasks
       <span id="navTaskDot" class="w-2 h-2 rounded-full bg-indigo-400 hidden"></span>
     </button>
   </div>
@@ -508,7 +523,7 @@
   <script>
     // CONSOLE AUTHORSHIP SIGNATURE
     console.log(
-      "%c Developed by Snehansu Deo %c Version 7.6 ",
+      "%c Developed by Snehansu Deo %c Version 7.7 ",
       "background: #4f46e5; color: #ffffff; font-weight: bold; padding: 4px 8px; border-radius: 4px;",
       "background: #1e293b; color: #a5b4fc; padding: 4px 8px; border-radius: 4px;"
     );
@@ -616,7 +631,7 @@
     function init() {
       // WRITE HIDDEN LOCALSTORAGE SIGNATURE FINGERPRINT
       if (!localStorage.getItem('d10c_signature')) {
-        localStorage.setItem('d10c_signature', 'ClockIt_CreatedBy_SnehansuDeo_v7.6');
+        localStorage.setItem('d10c_signature', 'ClockIt_CreatedBy_SnehansuDeo_v7.7');
       }
 
       applyTheme(currentTheme);
@@ -690,7 +705,7 @@
     }
 
     function applyTheme(theme) {
-      document.body.classList.remove('theme-oled', 'theme-emerald', 'theme-violet');
+      document.body.classList.remove('theme-oled', 'theme-emerald', 'theme-violet', 'theme-funky');
       document.body.classList.add(`theme-${theme}`);
 
       document.querySelectorAll('.theme-btn').forEach(btn => {
@@ -1148,7 +1163,7 @@
       renderTimetableViewer();
     }
 
-    /* RENDER SCHEDULE (FILTERED BY BATCH & SHOWS EXACT DAY'S PUNCH STATUS VIA TOP-RIGHT PILLS) */
+    /* RENDER SCHEDULE */
     function renderSchedule() {
       if (!userProfile) return;
       const userDiv = userProfile.div || 'D10C';
@@ -1198,7 +1213,7 @@
       }).join('');
     }
 
-    /* RENDER TIMETABLE VIEWER (UNFILTERED FOR SCHEDULE TAB) */
+    /* RENDER TIMETABLE VIEWER */
     function renderTimetableViewer() {
       if (!userProfile) return;
       const userDiv = userProfile.div || 'D10C';
