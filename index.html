@@ -1,4 +1,12 @@
 <!DOCTYPE html>
+<!-- 
+  ================================================
+  APP NAME: Clock it (Attendance & Task Tracker)
+  AUTHOR: Snehansu Deo
+  RELEASE: Version 7.6
+  ALL RIGHTS RESERVED
+  ================================================
+-->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -12,7 +20,7 @@
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="icon.png">
   <link rel="icon" type="image/png" href="icon.png">
-  <meta name="theme-color" content="#020617">
+  <meta name="theme-color" content="#030712">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Clock it">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -21,11 +29,39 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
   <style>
-    body { font-family: 'Plus Jakarta Sans', sans-serif; }
-    .glass-card {
-      background: rgba(30, 41, 59, 0.7);
+    body { font-family: 'Plus Jakarta Sans', sans-serif; transition: background-color 0.3s ease, color 0.3s ease; }
+    
+    /* 1. OLED Pitch Black Theme */
+    body.theme-oled {
+      background-color: #030712;
+      color: #f8fafc;
+    }
+    body.theme-oled .glass-card {
+      background: rgba(15, 23, 42, 0.7);
       backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    /* 2. Deep Forest Theme */
+    body.theme-emerald {
+      background: radial-gradient(circle at top left, #062016, #04120e, #020806);
+      color: #f8fafc;
+    }
+    body.theme-emerald .glass-card {
+      background: rgba(6, 30, 22, 0.75);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    /* 3. Midnight Violet Theme */
+    body.theme-violet {
+      background: radial-gradient(circle at top left, #2e1065, #0f172a, #030712);
+      color: #f8fafc;
+    }
+    body.theme-violet .glass-card {
+      background: rgba(24, 15, 46, 0.75);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(168, 85, 247, 0.25);
     }
 
     /* Live Emoji Animations */
@@ -72,13 +108,18 @@
     .animate-text-pop { animation: text-pop 0.5s 1.1s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
   </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen p-4 md:p-6 pb-24">
+<body class="theme-oled min-h-screen p-4 md:p-6 pb-24">
+
+  <!-- INVISIBLE AUTHORSHIP WATERMARK -->
+  <div id="author-watermark" aria-hidden="true" style="display: none !important; opacity: 0; pointer-events: none; position: absolute; width: 0; height: 0;">
+    Authored by Snehansu Deo - Clock it v7.6 - All Rights Reserved
+  </div>
 
   <!-- INTRO SPLASH SCREEN -->
   <div id="splashScreen" class="fixed inset-0 bg-slate-950 z-[100] flex flex-col items-center justify-center p-6 transition-opacity duration-700">
     <div class="text-center space-y-6 max-w-xs w-full">
       <div class="relative w-36 h-36 mx-auto flex items-center justify-center">
-        <div class="absolute inset-0 bg-gradient-to-tr from-indigo-600/40 via-violet-500/30 to-emerald-500/20 rounded-full blur-2xl animate-pulse"></div>
+        <div class="absolute inset-0 bg-gradient-to-tr from-indigo-600/30 via-violet-500/20 to-emerald-500/20 rounded-full blur-2xl animate-pulse"></div>
         <div class="relative w-28 h-28 glass-card border border-indigo-500/30 rounded-3xl flex items-center justify-center shadow-2xl animate-pinch-tap">
           <span class="text-5xl select-none z-10">🤏</span>
           <div class="absolute text-3xl z-20 transition-all duration-300 animate-clock-disappear">⏰</div>
@@ -95,11 +136,97 @@
     </div>
   </div>
 
+  <!-- SLIDE-OUT SIDEBAR DRAWER MENU -->
+  <div id="sidebarOverlay" onclick="closeSidebar()" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 transition-opacity"></div>
+  <aside id="sidebarDrawer" class="fixed top-0 left-0 bottom-0 w-72 bg-slate-900/95 border-r border-slate-800 backdrop-blur-2xl z-50 -translate-x-full transition-transform duration-300 ease-in-out p-6 flex flex-col justify-between shadow-2xl">
+    <div class="space-y-6">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+        <div class="flex items-center gap-3">
+          <div id="drawerAvatarWrapper" class="w-10 h-10 rounded-2xl bg-indigo-950 border border-indigo-500/40 p-0.5 overflow-hidden flex items-center justify-center shadow-md">
+            <img id="drawerAvatarImg" src="" alt="Student Avatar" class="w-full h-full object-cover rounded-xl">
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="text-sm font-extrabold text-white tracking-wider uppercase">Clock it</h2>
+              <span class="px-1.5 py-0.5 bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 rounded-md text-[9px] font-extrabold">v7.6</span>
+            </div>
+            <p class="text-[10px] text-slate-400 font-medium">Preferences & Settings</p>
+          </div>
+        </div>
+        <button onclick="closeSidebar()" class="p-1 text-slate-400 hover:text-white transition">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <div class="space-y-2">
+        <button onclick="editProfile(); closeSidebar();" class="w-full flex items-center gap-3 px-4 py-3 rounded-2xl bg-slate-950/80 hover:bg-slate-800/80 border border-slate-800 text-slate-200 font-bold text-xs transition">
+          <span>👤</span> Edit Student Profile
+        </button>
+        <button onclick="openSettingsModal(); closeSidebar();" class="w-full flex items-center gap-3 px-4 py-3 rounded-2xl bg-slate-950/80 hover:bg-slate-800/80 border border-slate-800 text-slate-200 font-bold text-xs transition">
+          <span>⚙️</span> App Settings
+        </button>
+
+        <!-- BACKUP DATA MANAGEMENT (EXPORT & IMPORT) -->
+        <div class="pt-2 border-t border-slate-800/80 space-y-2">
+          <button onclick="exportData()" class="w-full flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-slate-950/80 hover:bg-slate-800/80 border border-slate-800 text-slate-300 font-semibold text-xs transition">
+            <span>📤</span> Export Backup Data
+          </button>
+          <button onclick="triggerImport()" class="w-full flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-slate-950/80 hover:bg-slate-800/80 border border-slate-800 text-slate-300 font-semibold text-xs transition">
+            <span>📥</span> Import Backup Data
+          </button>
+          <input type="file" id="importFileInput" accept=".json" onchange="importData(event)" class="hidden">
+        </div>
+
+        <button onclick="openWhatsAppHelp()" class="w-full flex items-center gap-3 px-4 py-3 rounded-2xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 font-bold text-xs transition mt-2">
+          <span>💬</span> Help & Queries (WhatsApp)
+        </button>
+      </div>
+    </div>
+
+    <div class="space-y-3 border-t border-slate-800 pt-4">
+      <button onclick="openResetModal(); closeSidebar();" class="w-full flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 font-bold text-xs border border-rose-500/20 transition">
+        <span>⚠️</span> Reset All Data
+      </button>
+      <div class="text-center">
+        <p class="text-[10px] font-semibold text-slate-500 tracking-wider uppercase">Clock it • Version 7.6</p>
+      </div>
+    </div>
+  </aside>
+
+  <!-- APP SETTINGS MODAL (RESTRICTED TO 3 THEMES) -->
+  <div id="settingsModal" class="hidden fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center p-4">
+    <div class="glass-card p-6 rounded-3xl w-full max-w-sm shadow-2xl space-y-5 border border-indigo-500/30">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h2 class="text-sm font-extrabold text-white uppercase tracking-wider">⚙️ App Settings</h2>
+        <button onclick="closeSettingsModal()" class="text-slate-400 hover:text-white text-xs font-bold p-1">✕</button>
+      </div>
+
+      <div class="space-y-4 text-left">
+        <div class="p-3.5 bg-slate-900/60 rounded-2xl border border-slate-800/80 space-y-2.5">
+          <label class="text-[11px] font-bold text-indigo-400 uppercase tracking-wider block">Choose App Theme</label>
+          <div class="space-y-2">
+            <button onclick="setTheme('oled')" id="btnTheme_oled" class="theme-btn w-full py-2.5 px-3 rounded-xl border font-bold text-xs text-center transition">
+              OLED Pitch Black
+            </button>
+            <button onclick="setTheme('emerald')" id="btnTheme_emerald" class="theme-btn w-full py-2.5 px-3 rounded-xl border font-bold text-xs text-center transition">
+              Deep Forest
+            </button>
+            <button onclick="setTheme('violet')" id="btnTheme_violet" class="theme-btn w-full py-2.5 px-3 rounded-xl border font-bold text-xs text-center transition">
+              Midnight Violet
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <button onclick="closeSettingsModal()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 rounded-2xl font-bold text-xs text-white transition active:scale-95 shadow-lg shadow-indigo-600/30">Save & Apply</button>
+    </div>
+  </div>
+
   <div class="max-w-md mx-auto space-y-5">
     
-    <!-- User Setup Modal -->
+    <!-- User Setup Modal with Binary Gender Input -->
     <div id="setupModal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
-      <div class="glass-card p-6 rounded-3xl w-full max-w-sm text-center shadow-2xl space-y-5 border border-slate-700/50">
+      <div class="glass-card p-6 rounded-3xl w-full max-w-sm text-center shadow-2xl space-y-5 border border-slate-800">
         <div class="w-12 h-12 bg-indigo-500/20 text-indigo-400 rounded-2xl flex items-center justify-center mx-auto text-xl font-bold">⏰</div>
         <div>
           <h2 class="text-xl font-bold text-white">Clock it</h2>
@@ -109,11 +236,18 @@
         <form onsubmit="saveSetup(event)" class="space-y-3.5 text-left">
           <div>
             <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Full Name</label>
-            <input type="text" id="inputName" placeholder="e.g. Snehanshu" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 font-medium">
+            <input type="text" id="inputName" placeholder="e.g. Snehanshu" required class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 font-medium">
           </div>
           <div>
             <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Roll Number</label>
-            <input type="text" id="inputRoll" placeholder="e.g. 03" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 font-medium">
+            <input type="text" id="inputRoll" placeholder="e.g. 03" required class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 font-medium">
+          </div>
+          <div>
+            <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Gender</label>
+            <div class="grid grid-cols-2 gap-2">
+              <button type="button" onclick="selectGenderBtn('Male')" id="btnGenderMale" class="gender-opt py-2.5 bg-slate-900 border border-slate-800 rounded-xl font-bold text-xs text-slate-300 hover:border-indigo-500 transition">Male</button>
+              <button type="button" onclick="selectGenderBtn('Female')" id="btnGenderFemale" class="gender-opt py-2.5 bg-slate-900 border border-slate-800 rounded-xl font-bold text-xs text-slate-300 hover:border-indigo-500 transition">Female</button>
+            </div>
           </div>
           <div>
             <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Select Division</label>
@@ -131,7 +265,7 @@
               <button type="button" onclick="selectBatchBtn('C')" id="btnBatchC" class="batch-opt py-2.5 bg-slate-900 border border-slate-800 rounded-xl font-bold text-xs text-slate-300 hover:border-indigo-500 transition">Batch C</button>
             </div>
           </div>
-          <button type="submit" class="w-full py-3.5 mt-2 bg-indigo-600 hover:bg-indigo-500 rounded-2xl font-bold text-white shadow-lg shadow-indigo-600/30 transition active:scale-95 text-xs">Save Profile & Start</button>
+          <button type="submit" class="w-full py-3.5 mt-2 bg-indigo-600 hover:bg-indigo-500 rounded-2xl font-bold text-white shadow-lg shadow-indigo-600/25 transition active:scale-95 text-xs">Save Profile & Start</button>
         </form>
       </div>
     </div>
@@ -154,8 +288,39 @@
       </div>
     </div>
 
+    <!-- EXPANDED MONTHLY CALENDAR POPUP MODAL -->
+    <div id="calendarModal" class="hidden fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center p-4">
+      <div class="glass-card p-5 rounded-3xl w-full max-w-sm shadow-2xl space-y-4 border border-indigo-500/30">
+        <div class="flex items-center justify-between border-b border-slate-800/80 pb-3">
+          <button onclick="changeCalendarMonth(-1)" class="w-8 h-8 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-xl text-slate-300 font-bold flex items-center justify-center text-xs transition">←</button>
+          <div class="text-center">
+            <h3 id="calMonthYearTitle" class="text-xs font-extrabold text-white uppercase tracking-wider">August 2026</h3>
+            <p class="text-[10px] text-slate-400 font-medium mt-0.5">Select a date to jump to</p>
+          </div>
+          <button onclick="changeCalendarMonth(1)" class="w-8 h-8 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-xl text-slate-300 font-bold flex items-center justify-center text-xs transition">→</button>
+        </div>
+
+        <!-- Day Names Row -->
+        <div class="grid grid-cols-7 gap-1 text-center text-[10px] font-extrabold text-indigo-400 uppercase">
+          <div>Su</div><div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div>
+        </div>
+
+        <!-- Calendar Days Grid -->
+        <div id="calendarDaysGrid" class="grid grid-cols-7 gap-1 text-center text-xs font-bold"></div>
+
+        <!-- Legend -->
+        <div class="flex items-center justify-center gap-4 text-[10px] font-semibold text-slate-400 border-t border-slate-800/80 pt-3">
+          <div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> Present</div>
+          <div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-rose-400"></span> Absent</div>
+          <div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full border border-indigo-400"></span> Today</div>
+        </div>
+
+        <button onclick="closeCalendarModal()" class="w-full py-2.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-2xl font-bold text-xs text-slate-300 transition">Close Calendar</button>
+      </div>
+    </div>
+
     <!-- FLOATING TOAST POPUP FOR ATTENDANCE UPDATES -->
-    <div id="toastNotification" class="fixed bottom-20 left-1/2 -translate-x-1/2 max-w-xs w-full bg-slate-900/90 border border-slate-700/80 backdrop-blur-md px-4 py-3 rounded-2xl shadow-2xl z-50 transition-all duration-300 transform translate-y-10 opacity-0 pointer-events-none flex items-center justify-between">
+    <div id="toastNotification" class="fixed bottom-20 left-1/2 -translate-x-1/2 max-w-xs w-full bg-slate-900/90 border border-slate-800 backdrop-blur-md px-4 py-3 rounded-2xl shadow-2xl z-50 transition-all duration-300 transform translate-y-10 opacity-0 pointer-events-none flex items-center justify-between">
       <div class="flex items-center gap-3">
         <span id="toastIcon" class="text-lg">📈</span>
         <div>
@@ -166,12 +331,20 @@
       <span id="toastBadge" class="text-xs font-extrabold px-2 py-1 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">+0.0%</span>
     </div>
 
-    <!-- App Header -->
+    <!-- App Header with 3-Bar Sidebar Trigger & Dynamic Vector Avatar -->
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <div id="divHeaderBadge" class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white font-extrabold shadow-lg shadow-indigo-500/20 text-xs">
-          D10
+        <button onclick="openSidebar()" class="p-2.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-2xl text-slate-300 hover:text-white transition active:scale-95 shadow-md" title="Open Navigation Menu">
+          <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h16"/>
+          </svg>
+        </button>
+
+        <!-- DYNAMIC DICEBEAR AVATAR CONTAINER -->
+        <div id="headerAvatarBadge" class="w-10 h-10 rounded-2xl bg-indigo-950 border border-indigo-500/40 p-0.5 overflow-hidden flex items-center justify-center shadow-lg shadow-indigo-500/20">
+          <img id="userHeaderAvatar" src="" alt="Avatar" class="w-full h-full object-cover rounded-xl">
         </div>
+
         <div>
           <div class="flex items-center gap-1.5">
             <h1 class="text-xs font-extrabold text-indigo-400 uppercase tracking-wider">Clock it</h1>
@@ -181,18 +354,16 @@
           <p id="userDisplayDetails" class="text-[11px] font-medium text-slate-400">Roll No: -- | Class: --</p>
         </div>
       </div>
+
       <div class="flex gap-2">
         <button onclick="editProfile()" class="p-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-xl text-slate-400 hover:text-white transition" title="Edit Profile">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-        </button>
-        <button onclick="openResetModal()" class="p-2 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 rounded-xl text-rose-400 transition" title="Reset All Data">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
         </button>
       </div>
     </div>
 
     <!-- Motivational Greeting Banner -->
-    <div id="greetingBanner" class="p-4 bg-indigo-950/40 border border-indigo-500/30 rounded-2xl flex items-center justify-between">
+    <div id="greetingBanner" class="p-4 bg-indigo-950/30 border border-indigo-500/20 rounded-2xl flex items-center justify-between">
       <p id="greetingText" class="text-xs font-bold text-indigo-300">Hectic hai pata hai but 75% rakhlo🙏🏼</p>
     </div>
 
@@ -204,20 +375,31 @@
           <h2 class="text-xs font-bold uppercase tracking-wider text-amber-400">Proxy or Extra Class</h2>
         </div>
         <div class="flex gap-2">
-          <select id="extraSubjectSelect" class="bg-slate-950 border border-slate-800 text-slate-200 text-xs rounded-2xl px-3 py-2.5 flex-1 focus:outline-none focus:border-indigo-500 font-medium"></select>
+          <select id="extraSubjectSelect" class="bg-slate-900 border border-slate-800 text-slate-200 text-xs rounded-2xl px-3 py-2.5 flex-1 focus:outline-none focus:border-indigo-500 font-medium"></select>
           <button onclick="logExtra('present')" class="px-3.5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl text-xs font-bold transition active:scale-95 shadow-lg shadow-emerald-600/20">+ Present</button>
           <button onclick="logExtra('absent')" class="px-3.5 py-2.5 bg-rose-600 hover:bg-rose-500 text-white rounded-2xl text-xs font-bold transition active:scale-95 shadow-lg shadow-rose-600/20">+ Absent</button>
         </div>
       </div>
 
       <div class="glass-card p-5 rounded-3xl space-y-4">
-        <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Daily Schedule</h2>
-        <div class="flex gap-1.5 p-1 bg-slate-950 rounded-2xl border border-slate-800" id="dayTabs">
-          <button onclick="selectDay('MON')" class="day-btn flex-1 py-2 rounded-xl bg-indigo-600 text-white font-bold text-xs transition">Mon</button>
-          <button onclick="selectDay('TUE')" class="day-btn flex-1 py-2 rounded-xl text-slate-400 hover:text-slate-200 font-bold text-xs transition">Tue</button>
-          <button onclick="selectDay('WED')" class="day-btn flex-1 py-2 rounded-xl text-slate-400 hover:text-slate-200 font-bold text-xs transition">Wed</button>
-          <button onclick="selectDay('THU')" class="day-btn flex-1 py-2 rounded-xl text-slate-400 hover:text-slate-200 font-bold text-xs transition">Thu</button>
-          <button onclick="selectDay('FRI')" class="day-btn flex-1 py-2 rounded-xl text-slate-400 hover:text-slate-200 font-bold text-xs transition">Fri</button>
+        <!-- Date Selector Header with Interactive Calendar SVG Trigger -->
+        <div class="flex items-center justify-between border-b border-slate-800/80 pb-3">
+          <div>
+            <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Daily Schedule</h2>
+            <p id="selectedDateFormatted" class="text-[10px] text-indigo-400 font-semibold mt-0.5">Today</p>
+          </div>
+          <button onclick="openCalendarModal()" class="flex items-center gap-2 bg-slate-900 hover:bg-slate-800/80 border border-slate-800 hover:border-indigo-500 rounded-2xl px-3.5 py-2 text-slate-200 font-bold text-xs transition active:scale-95">
+            <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            <span id="calendarButtonText">Pick Date</span>
+          </button>
+        </div>
+
+        <div class="flex gap-1.5 p-1 bg-slate-900/90 rounded-2xl border border-slate-800" id="dayTabs">
+          <button onclick="selectDay('MON')" id="tabMON" class="day-btn flex-1 py-2 rounded-xl text-slate-400 hover:text-slate-200 font-bold text-xs transition">Mon</button>
+          <button onclick="selectDay('TUE')" id="tabTUE" class="day-btn flex-1 py-2 rounded-xl text-slate-400 hover:text-slate-200 font-bold text-xs transition">Tue</button>
+          <button onclick="selectDay('WED')" id="tabWED" class="day-btn flex-1 py-2 rounded-xl text-slate-400 hover:text-slate-200 font-bold text-xs transition">Wed</button>
+          <button onclick="selectDay('THU')" id="tabTHU" class="day-btn flex-1 py-2 rounded-xl text-slate-400 hover:text-slate-200 font-bold text-xs transition">Thu</button>
+          <button onclick="selectDay('FRI')" id="tabFRI" class="day-btn flex-1 py-2 rounded-xl text-slate-400 hover:text-slate-200 font-bold text-xs transition">Fri</button>
         </div>
         <div id="scheduleContainer" class="space-y-2.5 pt-1"></div>
       </div>
@@ -263,12 +445,12 @@
           <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Weekly Timetable Schedule</h2>
           <span id="timetableClassBadge" class="text-[10px] font-extrabold bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 px-2.5 py-1 rounded-xl">D10C</span>
         </div>
-        <div class="flex gap-1.5 p-1 bg-slate-950 rounded-2xl border border-slate-800">
-          <button onclick="selectTtDay('MON')" class="tt-day-btn flex-1 py-2 rounded-xl bg-indigo-600 text-white font-bold text-xs transition">Mon</button>
-          <button onclick="selectTtDay('TUE')" class="tt-day-btn flex-1 py-2 rounded-xl text-slate-400 hover:text-slate-200 font-bold text-xs transition">Tue</button>
-          <button onclick="selectTtDay('WED')" class="tt-day-btn flex-1 py-2 rounded-xl text-slate-400 hover:text-slate-200 font-bold text-xs transition">Wed</button>
-          <button onclick="selectTtDay('THU')" class="tt-day-btn flex-1 py-2 rounded-xl text-slate-400 hover:text-slate-200 font-bold text-xs transition">Thu</button>
-          <button onclick="selectTtDay('FRI')" class="tt-day-btn flex-1 py-2 rounded-xl text-slate-400 hover:text-slate-200 font-bold text-xs transition">Fri</button>
+        <div class="flex gap-1.5 p-1 bg-slate-900/90 rounded-2xl border border-slate-800">
+          <button onclick="selectTtDay('MON')" id="ttTabMON" class="tt-day-btn flex-1 py-2 rounded-xl text-slate-400 hover:text-slate-200 font-bold text-xs transition">Mon</button>
+          <button onclick="selectTtDay('TUE')" id="ttTabTUE" class="tt-day-btn flex-1 py-2 rounded-xl text-slate-400 hover:text-slate-200 font-bold text-xs transition">Tue</button>
+          <button onclick="selectTtDay('WED')" id="ttTabWED" class="tt-day-btn flex-1 py-2 rounded-xl text-slate-400 hover:text-slate-200 font-bold text-xs transition">Wed</button>
+          <button onclick="selectTtDay('THU')" id="ttTabTHU" class="tt-day-btn flex-1 py-2 rounded-xl text-slate-400 hover:text-slate-200 font-bold text-xs transition">Thu</button>
+          <button onclick="selectTtDay('FRI')" id="ttTabFRI" class="tt-day-btn flex-1 py-2 rounded-xl text-slate-400 hover:text-slate-200 font-bold text-xs transition">Fri</button>
         </div>
         <div id="timetableViewerContainer" class="space-y-2.5 pt-1"></div>
       </div>
@@ -294,8 +476,8 @@
 
         <form onsubmit="addTask(event)" class="space-y-2.5">
           <div class="flex gap-2">
-            <input type="text" id="taskTitle" placeholder="Assignment title..." required class="bg-slate-950 border border-slate-800 text-slate-200 text-xs rounded-2xl px-3.5 py-2.5 flex-1 focus:outline-none focus:border-indigo-500 font-medium">
-            <input type="date" id="taskDueDate" required class="bg-slate-950 border border-slate-800 text-slate-200 text-xs rounded-2xl px-3 py-2.5 focus:outline-none focus:border-indigo-500 font-medium">
+            <input type="text" id="taskTitle" placeholder="Assignment title..." required class="bg-slate-900 border border-slate-800 text-slate-200 text-xs rounded-2xl px-3.5 py-2.5 flex-1 focus:outline-none focus:border-indigo-500 font-medium">
+            <input type="date" id="taskDueDate" required class="bg-slate-900 border border-slate-800 text-slate-200 text-xs rounded-2xl px-3 py-2.5 focus:outline-none focus:border-indigo-500 font-medium">
           </div>
           <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl text-xs font-bold transition active:scale-95 shadow-lg shadow-indigo-600/20">+ Add Task</button>
         </form>
@@ -307,7 +489,7 @@
   </div>
 
   <!-- FLOATING BOTTOM NAVIGATION BAR -->
-  <div class="fixed bottom-4 left-1/2 -translate-x-1/2 max-w-md w-[calc(100%-2rem)] glass-card p-2 rounded-3xl shadow-2xl border border-slate-700/60 z-40 flex justify-around">
+  <div class="fixed bottom-4 left-1/2 -translate-x-1/2 max-w-md w-[calc(100%-2rem)] glass-card p-2 rounded-3xl shadow-2xl border border-slate-800 z-40 flex justify-around">
     <button onclick="switchTab('attendance')" id="navAttendance" class="flex-1 py-2.5 rounded-2xl bg-indigo-600 text-white flex items-center justify-center gap-1.5 font-bold text-[11px] transition">
       <span>📊</span> Track
     </button>
@@ -324,6 +506,13 @@
   </div>
 
   <script>
+    // CONSOLE AUTHORSHIP SIGNATURE
+    console.log(
+      "%c Developed by Snehansu Deo %c Version 7.6 ",
+      "background: #4f46e5; color: #ffffff; font-weight: bold; padding: 4px 8px; border-radius: 4px;",
+      "background: #1e293b; color: #a5b4fc; padding: 4px 8px; border-radius: 4px;"
+    );
+
     const timetables = {
       D10A: {
         MON: ["DBMS (8:30)", "Devops (9:30)", "OS (10:30)", "DSA (11:30)", "PCE Tut/514 (1:30-3:30)"],
@@ -349,6 +538,8 @@
     };
 
     const coreSubjectsList = ["DBMS", "DBMS Lab", "OS", "OS Lab", "DSA", "DSA Lab", "Devops", "Devops Lab", "FM", "PCE"];
+    const dayMap = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+    const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
     function getCleanSubjectName(rawName) {
       if (!rawName) return "Elective";
@@ -366,29 +557,46 @@
 
     function isEntryForUserBatch(entry, userBatch) {
       if (!userBatch) return true;
-
       const targetBatch = userBatch.replace(/batch/i, '').trim().toUpperCase();
       const upperEntry = entry.toUpperCase();
-
       const matches = [...upperEntry.matchAll(/\/([A-C])(?=[/\s\(-]|$)/g)];
-
       if (matches.length > 0) {
         const entryBatches = matches.map(m => m[1]);
         return entryBatches.includes(targetBatch);
       }
-
       return true;
+    }
+
+    function getTodayISO() {
+      const d = new Date();
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+
+    function getDayOfWeekFromDateString(dateStr) {
+      const parts = dateStr.split('-');
+      const d = new Date(parts[0], parts[1] - 1, parts[2]);
+      const dayIdx = d.getDay();
+      return (dayIdx >= 1 && dayIdx <= 5) ? dayMap[dayIdx] : 'MON';
     }
 
     let userProfile = JSON.parse(localStorage.getItem('d10c_user')) || null;
     let attendance = JSON.parse(localStorage.getItem('d10c_attendance')) || {};
+    let punchLogs = JSON.parse(localStorage.getItem('d10c_punch_logs')) || [];
     let tasks = JSON.parse(localStorage.getItem('d10c_tasks')) || [];
+    let currentTheme = localStorage.getItem('d10c_theme') || 'oled';
     
     let selectedDivTemp = 'D10C';
     let selectedBatchTemp = 'A';
-    let activeDay = 'MON';
-    let activeTtDay = 'MON';
+    let selectedGenderTemp = 'Male';
+    
+    let selectedDate = getTodayISO();
+    let activeDay = getDayOfWeekFromDateString(selectedDate);
+    let activeTtDay = activeDay;
     let toastTimeout = null;
+
+    // Calendar Modal State
+    let calViewYear = new Date().getFullYear();
+    let calViewMonth = new Date().getMonth(); // 0-indexed
 
     // Splash Screen Timeline
     window.addEventListener('DOMContentLoaded', () => {
@@ -399,24 +607,247 @@
       }, 2600);
     });
 
+    function getDiceBearAvatarUrl(seedStr, gender) {
+      const cleanSeed = encodeURIComponent(seedStr || 'Student');
+      const style = gender === 'Female' ? 'personas' : 'bottts-neutral';
+      return `https://api.dicebear.com/7.x/${style}/svg?seed=${cleanSeed}&backgroundColor=0f172a,1e1b4b,030712`;
+    }
+
     function init() {
+      // WRITE HIDDEN LOCALSTORAGE SIGNATURE FINGERPRINT
+      if (!localStorage.getItem('d10c_signature')) {
+        localStorage.setItem('d10c_signature', 'ClockIt_CreatedBy_SnehansuDeo_v7.6');
+      }
+
+      applyTheme(currentTheme);
       populateSubjectDropdown();
+      updateFormattedDateDisplay();
+
       if (!userProfile) {
         selectDivBtn('D10C');
         selectBatchBtn('A');
+        selectGenderBtn('Male');
         document.getElementById('setupModal').classList.remove('hidden');
       } else {
         document.getElementById('setupModal').classList.add('hidden');
         document.getElementById('userDisplayName').innerText = userProfile.name;
         document.getElementById('userDisplayDetails').innerText = `Roll No: ${userProfile.roll} | Class: ${userProfile.div} (${userProfile.batch})`;
-        document.getElementById('divHeaderBadge').innerText = userProfile.div;
         document.getElementById('timetableClassBadge').innerText = `${userProfile.div} (${userProfile.batch})`;
         document.getElementById('greetingText').innerText = `Hey ${userProfile.name}! Hectic hai pata hai but 75% rakhlo🙏🏼`;
+        
+        // DYNAMIC DICEBEAR AVATAR GENERATION WITH GENDER FALLBACK
+        const userGender = userProfile.gender || 'Male';
+        const avatarSeed = `${userProfile.name}_${userProfile.div}_${userProfile.roll}`;
+        const avatarUrl = getDiceBearAvatarUrl(avatarSeed, userGender);
+        
+        document.getElementById('userHeaderAvatar').src = avatarUrl;
+        document.getElementById('drawerAvatarImg').src = avatarUrl;
+
+        highlightActiveDayBtn();
         renderSchedule();
         renderTimetableViewer();
         renderStats();
         renderTasks();
       }
+    }
+
+    function selectGenderBtn(gender) {
+      selectedGenderTemp = gender;
+      document.querySelectorAll('.gender-opt').forEach(btn => {
+        btn.classList.remove('bg-indigo-600', 'text-white', 'border-indigo-500');
+        btn.classList.add('bg-slate-900', 'text-slate-300', 'border-slate-800');
+      });
+      const activeBtn = document.getElementById(`btnGender${gender}`);
+      if (activeBtn) {
+        activeBtn.classList.remove('bg-slate-900', 'text-slate-300', 'border-slate-800');
+        activeBtn.classList.add('bg-indigo-600', 'text-white', 'border-indigo-500');
+      }
+    }
+
+    /* SIDEBAR & SETTINGS LOGIC */
+    function openSidebar() {
+      document.getElementById('sidebarOverlay').classList.remove('hidden');
+      document.getElementById('sidebarDrawer').classList.remove('-translate-x-full');
+    }
+
+    function closeSidebar() {
+      document.getElementById('sidebarOverlay').classList.add('hidden');
+      document.getElementById('sidebarDrawer').classList.add('-translate-x-full');
+    }
+
+    function openSettingsModal() {
+      document.getElementById('settingsModal').classList.remove('hidden');
+    }
+
+    function closeSettingsModal() {
+      document.getElementById('settingsModal').classList.add('hidden');
+    }
+
+    function setTheme(theme) {
+      currentTheme = theme;
+      localStorage.setItem('d10c_theme', theme);
+      applyTheme(theme);
+    }
+
+    function applyTheme(theme) {
+      document.body.classList.remove('theme-oled', 'theme-emerald', 'theme-violet');
+      document.body.classList.add(`theme-${theme}`);
+
+      document.querySelectorAll('.theme-btn').forEach(btn => {
+        btn.className = "theme-btn w-full py-2.5 px-3 rounded-xl border bg-slate-950 border-slate-800 text-slate-300 font-bold text-xs text-center transition";
+      });
+
+      const activeBtn = document.getElementById(`btnTheme_${theme}`);
+      if (activeBtn) {
+        activeBtn.className = "theme-btn w-full py-2.5 px-3 rounded-xl border bg-indigo-600 border-indigo-400 text-white font-bold text-xs text-center transition shadow-md";
+      }
+    }
+
+    function openWhatsAppHelp() {
+      const phone = "919321215929";
+      const message = encodeURIComponent("Hey Snehanshu, I have a query regarding Clock it attendance tracker!");
+      window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
+    }
+
+    function exportData() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ userProfile, attendance, punchLogs, tasks, currentTheme }));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `clock_it_backup_${getTodayISO()}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    }
+
+    function triggerImport() {
+      document.getElementById('importFileInput').click();
+    }
+
+    function importData(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const imported = JSON.parse(e.target.result);
+          if (imported.userProfile) localStorage.setItem('d10c_user', JSON.stringify(imported.userProfile));
+          if (imported.attendance) localStorage.setItem('d10c_attendance', JSON.stringify(imported.attendance));
+          if (imported.punchLogs) localStorage.setItem('d10c_punch_logs', JSON.stringify(imported.punchLogs));
+          if (imported.tasks) localStorage.setItem('d10c_tasks', JSON.stringify(imported.tasks));
+          if (imported.currentTheme) localStorage.setItem('d10c_theme', imported.currentTheme);
+
+          userProfile = imported.userProfile || userProfile;
+          attendance = imported.attendance || attendance;
+          punchLogs = imported.punchLogs || punchLogs;
+          tasks = imported.tasks || tasks;
+          currentTheme = imported.currentTheme || currentTheme;
+
+          closeSidebar();
+          init();
+          alert("Backup data imported successfully!");
+        } catch (err) {
+          alert("Invalid backup JSON file.");
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function updateFormattedDateDisplay() {
+      const parts = selectedDate.split('-');
+      const dateObj = new Date(parts[0], parts[1] - 1, parts[2]);
+      const options = { month: 'short', day: 'numeric' };
+      const formatted = dateObj.toLocaleDateString('en-US', options);
+      const isToday = selectedDate === getTodayISO();
+      
+      document.getElementById('selectedDateFormatted').innerText = isToday ? `Today (${formatted})` : formatted;
+      document.getElementById('calendarButtonText').innerText = formatted;
+    }
+
+    /* CUSTOM EXPANDED MONTHLY CALENDAR POPUP LOGIC */
+    function openCalendarModal() {
+      const parts = selectedDate.split('-');
+      calViewYear = parseInt(parts[0]);
+      calViewMonth = parseInt(parts[1]) - 1;
+      renderCalendarGrid();
+      document.getElementById('calendarModal').classList.remove('hidden');
+    }
+
+    function closeCalendarModal() {
+      document.getElementById('calendarModal').classList.add('hidden');
+    }
+
+    function changeCalendarMonth(delta) {
+      calViewMonth += delta;
+      if (calViewMonth < 0) {
+        calViewMonth = 11;
+        calViewYear--;
+      } else if (calViewMonth > 11) {
+        calViewMonth = 0;
+        calViewYear++;
+      }
+      renderCalendarGrid();
+    }
+
+    function renderCalendarGrid() {
+      document.getElementById('calMonthYearTitle').innerText = `${monthNames[calViewMonth]} ${calViewYear}`;
+      const grid = document.getElementById('calendarDaysGrid');
+      grid.innerHTML = '';
+
+      const firstDayIdx = new Date(calViewYear, calViewMonth, 1).getDay();
+      const daysInMonth = new Date(calViewYear, calViewMonth + 1, 0).getDate();
+      const todayISO = getTodayISO();
+
+      // Empty lead slots
+      for (let i = 0; i < firstDayIdx; i++) {
+        grid.innerHTML += `<div class="py-2"></div>`;
+      }
+
+      // Render Day Cells
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dateISO = `${calViewYear}-${String(calViewMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const isSelected = dateISO === selectedDate;
+        const isToday = dateISO === todayISO;
+
+        // Check attendance logs for status dots on this date
+        const dayLogs = punchLogs.filter(l => l.date === dateISO);
+        const hasPresent = dayLogs.some(l => l.status === 'present');
+        const hasAbsent = dayLogs.some(l => l.status === 'absent');
+
+        let dotHtml = '';
+        if (hasPresent && hasAbsent) {
+          dotHtml = `<div class="flex gap-0.5 justify-center mt-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span><span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span></div>`;
+        } else if (hasPresent) {
+          dotHtml = `<div class="flex justify-center mt-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span></div>`;
+        } else if (hasAbsent) {
+          dotHtml = `<div class="flex justify-center mt-1"><span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span></div>`;
+        } else {
+          dotHtml = `<div class="h-2"></div>`;
+        }
+
+        let bgClass = "bg-slate-900/60 text-slate-300 border-slate-800 hover:border-indigo-500";
+        if (isSelected) {
+          bgClass = "bg-indigo-600 text-white font-extrabold border-indigo-400 shadow-lg shadow-indigo-600/30";
+        } else if (isToday) {
+          bgClass = "bg-slate-900 border-indigo-500 text-indigo-300 font-bold";
+        }
+
+        grid.innerHTML += `
+          <button onclick="selectCalendarDate('${dateISO}')" class="py-2 rounded-2xl border ${bgClass} flex flex-col items-center justify-center transition active:scale-95">
+            <span>${day}</span>
+            ${dotHtml}
+          </button>
+        `;
+      }
+    }
+
+    function selectCalendarDate(dateISO) {
+      selectedDate = dateISO;
+      activeDay = getDayOfWeekFromDateString(selectedDate);
+      updateFormattedDateDisplay();
+      highlightActiveDayBtn();
+      renderSchedule();
+      closeCalendarModal();
     }
 
     function switchTab(tab) {
@@ -491,7 +922,7 @@
       const roll = document.getElementById('inputRoll').value.trim();
       if (!name || !roll) return;
 
-      userProfile = { name, roll, div: selectedDivTemp, batch: selectedBatchTemp };
+      userProfile = { name, roll, gender: selectedGenderTemp, div: selectedDivTemp, batch: selectedBatchTemp };
       localStorage.setItem('d10c_user', JSON.stringify(userProfile));
       init();
     }
@@ -500,6 +931,7 @@
       if (userProfile) {
         document.getElementById('inputName').value = userProfile.name;
         document.getElementById('inputRoll').value = userProfile.roll;
+        selectGenderBtn(userProfile.gender || 'Male');
         selectDivBtn(userProfile.div);
         selectBatchBtn(userProfile.batch);
       }
@@ -522,9 +954,11 @@
 
     function confirmResetAllData() {
       localStorage.removeItem('d10c_attendance');
+      localStorage.removeItem('d10c_punch_logs');
       localStorage.removeItem('d10c_user');
       localStorage.removeItem('d10c_tasks');
       attendance = {};
+      punchLogs = [];
       tasks = [];
       userProfile = null;
       closeResetModal();
@@ -579,39 +1013,67 @@
       const oldT = attendance[cleanSub].total;
       const oldPct = oldT > 0 ? (oldP / oldT) * 100 : 0;
 
+      // Remove existing punch for same date & subject if overwriting
+      const existingIdx = punchLogs.findIndex(l => l.date === selectedDate && getCleanSubjectName(l.subject) === cleanSub);
+      if (existingIdx !== -1) {
+        const prevLog = punchLogs[existingIdx];
+        if (prevLog.status === 'present') attendance[cleanSub].present = Math.max(0, attendance[cleanSub].present - 1);
+        attendance[cleanSub].total = Math.max(0, attendance[cleanSub].total - 1);
+        punchLogs.splice(existingIdx, 1);
+      }
+
       attendance[cleanSub].total += 1;
       if (status === 'present') {
         attendance[cleanSub].present += 1;
-        attendance[cleanSub].lastAction.push('present');
-      } else {
-        attendance[cleanSub].lastAction.push('absent');
       }
+
+      punchLogs.push({
+        id: Date.now(),
+        date: selectedDate,
+        subject: cleanSub,
+        rawSubject: rawSubject,
+        status: status
+      });
 
       const newP = attendance[cleanSub].present;
       const newT = attendance[cleanSub].total;
       const newPct = (newP / newT) * 100;
 
       localStorage.setItem('d10c_attendance', JSON.stringify(attendance));
+      localStorage.setItem('d10c_punch_logs', JSON.stringify(punchLogs));
+
       renderStats();
+      renderSchedule();
       showToast(cleanSub, status, oldPct, newPct);
     }
 
     function undoLastClass(rawSubject) {
       const cleanSub = getCleanSubjectName(rawSubject);
+      const existingIdx = punchLogs.findIndex(l => l.date === selectedDate && getCleanSubjectName(l.subject) === cleanSub);
+      
+      if (existingIdx !== -1) {
+        const log = punchLogs[existingIdx];
+        attendance[cleanSub].total = Math.max(0, attendance[cleanSub].total - 1);
+        if (log.status === 'present') {
+          attendance[cleanSub].present = Math.max(0, attendance[cleanSub].present - 1);
+        }
+        punchLogs.splice(existingIdx, 1);
+        localStorage.setItem('d10c_attendance', JSON.stringify(attendance));
+        localStorage.setItem('d10c_punch_logs', JSON.stringify(punchLogs));
+        renderStats();
+        renderSchedule();
+        showToast(cleanSub, 'undo', (attendance[cleanSub].present / Math.max(1, attendance[cleanSub].total)) * 100, (attendance[cleanSub].present / Math.max(1, attendance[cleanSub].total)) * 100);
+        return;
+      }
+
       if (!attendance[cleanSub] || attendance[cleanSub].total <= 0) return;
 
       const oldP = attendance[cleanSub].present;
       const oldT = attendance[cleanSub].total;
       const oldPct = oldT > 0 ? (oldP / oldT) * 100 : 0;
 
-      if (!attendance[cleanSub].lastAction) attendance[cleanSub].lastAction = [];
-      const lastType = attendance[cleanSub].lastAction.pop() || 'present';
-
       attendance[cleanSub].total = Math.max(0, attendance[cleanSub].total - 1);
-
-      if (lastType === 'present') {
-        attendance[cleanSub].present = Math.max(0, attendance[cleanSub].present - 1);
-      }
+      attendance[cleanSub].present = Math.max(0, attendance[cleanSub].present - 1);
 
       const newP = attendance[cleanSub].present;
       const newT = attendance[cleanSub].total;
@@ -619,6 +1081,7 @@
 
       localStorage.setItem('d10c_attendance', JSON.stringify(attendance));
       renderStats();
+      renderSchedule();
       showToast(cleanSub, 'undo', oldPct, newPct);
     }
 
@@ -653,14 +1116,21 @@
       showToast(cleanSub, 'undo', oldPct, newPct);
     }
 
-    function selectDay(day) {
-      activeDay = day;
+    function highlightActiveDayBtn() {
       document.querySelectorAll('.day-btn').forEach(btn => {
         btn.classList.remove('bg-indigo-600', 'text-white');
         btn.classList.add('text-slate-400');
       });
-      event.target.classList.remove('text-slate-400');
-      event.target.classList.add('bg-indigo-600', 'text-white');
+      const targetBtn = document.getElementById(`tab${activeDay}`);
+      if (targetBtn) {
+        targetBtn.classList.remove('text-slate-400');
+        targetBtn.classList.add('bg-indigo-600', 'text-white');
+      }
+    }
+
+    function selectDay(day) {
+      activeDay = day;
+      highlightActiveDayBtn();
       renderSchedule();
     }
 
@@ -670,12 +1140,15 @@
         btn.classList.remove('bg-indigo-600', 'text-white');
         btn.classList.add('text-slate-400');
       });
-      event.target.classList.remove('text-slate-400');
-      event.target.classList.add('bg-indigo-600', 'text-white');
+      const targetBtn = document.getElementById(`ttTab${day}`);
+      if (targetBtn) {
+        targetBtn.classList.remove('text-slate-400');
+        targetBtn.classList.add('bg-indigo-600', 'text-white');
+      }
       renderTimetableViewer();
     }
 
-    /* RENDER SCHEDULE (FILTERED BY BATCH FOR TRACK TAB) */
+    /* RENDER SCHEDULE (FILTERED BY BATCH & SHOWS EXACT DAY'S PUNCH STATUS VIA TOP-RIGHT PILLS) */
     function renderSchedule() {
       if (!userProfile) return;
       const userDiv = userProfile.div || 'D10C';
@@ -686,20 +1159,43 @@
       const filteredList = rawList.filter(entry => isEntryForUserBatch(entry, userBatch));
 
       if (!filteredList || filteredList.length === 0) {
-        container.innerHTML = `<p class="text-xs text-slate-500 italic text-center py-4">No classes scheduled for your batch today.</p>`;
+        container.innerHTML = `<p class="text-xs text-slate-500 italic text-center py-6">No classes scheduled for your batch on this day.</p>`;
         return;
       }
 
-      container.innerHTML = filteredList.map(sub => `
-        <div class="flex items-center justify-between p-3.5 bg-slate-900/60 rounded-2xl border border-slate-800/80 hover:border-slate-700 transition">
-          <span class="font-semibold text-slate-200 text-xs">${sub}</span>
-          <div class="flex gap-1.5">
-            <button onclick="mark('${sub.replace(/'/g, "\\'")}', 'present')" class="w-8 h-8 bg-emerald-600/20 hover:bg-emerald-600 text-emerald-400 hover:text-white border border-emerald-500/30 rounded-xl text-xs font-bold transition active:scale-90 flex items-center justify-center">P</button>
-            <button onclick="mark('${sub.replace(/'/g, "\\'")}', 'absent')" class="w-8 h-8 bg-rose-600/20 hover:bg-rose-600 text-rose-400 hover:text-white border border-rose-500/30 rounded-xl text-xs font-bold transition active:scale-90 flex items-center justify-center">A</button>
-            <button onclick="undoLastClass('${sub.replace(/'/g, "\\'")}')" class="w-8 h-8 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 rounded-xl text-xs font-bold transition active:scale-90 flex items-center justify-center" title="Undo Last Action">↺</button>
+      container.innerHTML = filteredList.map(sub => {
+        const cleanSub = getCleanSubjectName(sub);
+        const existingLog = punchLogs.find(l => l.date === selectedDate && getCleanSubjectName(l.subject) === cleanSub);
+        const hasPunched = !!existingLog;
+        const punchedStatus = existingLog ? existingLog.status : null;
+
+        let statusPillHtml = `<span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-slate-800/80 text-slate-400 border border-slate-700/50 uppercase">PENDING</span>`;
+        if (hasPunched) {
+          if (punchedStatus === 'present') {
+            statusPillHtml = `<span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 uppercase">✓ PRESENT</span>`;
+          } else {
+            statusPillHtml = `<span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-rose-500/20 text-rose-400 border border-rose-500/30 uppercase">✕ ABSENT</span>`;
+          }
+        }
+
+        return `
+          <div class="p-3.5 bg-slate-900/60 rounded-2xl border ${hasPunched ? (punchedStatus === 'present' ? 'border-emerald-500/30 bg-emerald-950/10' : 'border-rose-500/30 bg-rose-950/10') : 'border-slate-800/80'} hover:border-slate-700 transition">
+            <div class="flex items-center justify-between">
+              <div class="pr-2">
+                <span class="font-semibold text-slate-200 text-xs block leading-tight">${sub}</span>
+              </div>
+              <div class="flex items-center gap-2">
+                ${statusPillHtml}
+                <div class="flex gap-1">
+                  <button onclick="mark('${sub.replace(/'/g, "\\'")}', 'present')" class="w-7 h-7 ${punchedStatus === 'present' ? 'bg-emerald-600 text-white font-extrabold shadow-lg shadow-emerald-600/40 scale-105' : 'bg-emerald-600/20 hover:bg-emerald-600 text-emerald-400 hover:text-white'} border border-emerald-500/30 rounded-xl text-xs font-bold transition active:scale-90 flex items-center justify-center">P</button>
+                  <button onclick="mark('${sub.replace(/'/g, "\\'")}', 'absent')" class="w-7 h-7 ${punchedStatus === 'absent' ? 'bg-rose-600 text-white font-extrabold shadow-lg shadow-rose-600/40 scale-105' : 'bg-rose-600/20 hover:bg-rose-600 text-rose-400 hover:text-white'} border border-rose-500/30 rounded-xl text-xs font-bold transition active:scale-90 flex items-center justify-center">A</button>
+                  <button onclick="undoLastClass('${sub.replace(/'/g, "\\'")}')" class="w-7 h-7 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 rounded-xl text-xs font-bold transition active:scale-90 flex items-center justify-center" title="Undo / Clear Punch">↺</button>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
     }
 
     /* RENDER TIMETABLE VIEWER (UNFILTERED FOR SCHEDULE TAB) */
@@ -760,7 +1256,7 @@
     function checkUpcomingDeadlines() {
       const alertBanner = document.getElementById('taskAlertBanner');
       const alertText = document.getElementById('taskAlertText');
-      const today = new Date().toISOString().split('T')[0];
+      const today = getTodayISO();
       
       const tomorrowObj = new Date();
       tomorrowObj.setDate(tomorrowObj.getDate() + 1);
@@ -815,7 +1311,7 @@
       `).join('');
     }
 
-    /* ATTENDANCE TARGET CALCULATOR FUNCTIONS */
+    /* ATTENDANCE TARGET CALCULATOR FUNCTIONS (FIXED 75% TARGET) */
     function calcNeeded(p, t, targetRatio) {
       if (t === 0) return 0;
       if (p / t >= targetRatio) return 0;
